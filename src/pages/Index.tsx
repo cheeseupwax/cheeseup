@@ -1,11 +1,12 @@
 import { useWaxWallet } from "@/hooks/useWaxWallet";
 import { useContractStats } from "@/hooks/useContractStats";
 import { toast } from "sonner";
-import { Header } from "@/components/Header";
 import { BackgroundEffects } from "@/components/BackgroundEffects";
 import { PowerUpCard } from "@/components/PowerUpCard";
 import { StatsBar } from "@/components/StatsBar";
 import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Wallet, LogOut, Loader2 } from "lucide-react";
 
 const Index = () => {
   const {
@@ -40,36 +41,37 @@ const Index = () => {
     <div className="min-h-screen relative">
       <BackgroundEffects />
 
-      <Header
-        walletConnected={isConnected}
-        walletAddress={accountName || undefined}
-        cheeseBalance={cheeseBalance}
-        isLoadingBalance={isLoadingBalance}
-        onConnectWallet={handleConnectWallet}
-        isLoading={isLoading}
-      />
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12 gap-6">
 
-      <main className="relative z-10 flex flex-col items-center min-h-screen px-4 pt-28 pb-4 gap-6">
-        {/* Hero */}
-        <div className="text-center space-y-3 mt-4 mb-2">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="relative">
-              <div
-                className="absolute inset-0 rounded-full blur-2xl"
-                style={{ background: "hsl(45 100% 50% / 0.3)", transform: "scale(1.5)" }}
-              />
-              <span className="relative text-6xl md:text-7xl select-none">🧀</span>
+        {/* Wallet button — centred above title */}
+        <div className="flex flex-col items-center gap-2">
+          {isLoading ? (
+            <Button variant="outline" disabled className="gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading...
+            </Button>
+          ) : isConnected && accountName ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-foreground">
+                👤 {accountName}
+              </span>
+              <Button variant="outline" size="sm" onClick={handleConnectWallet} className="gap-2 border-border">
+                <LogOut className="h-4 w-4" />
+                Disconnect
+              </Button>
             </div>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-            <span className="text-cheese-gradient">Cheese</span>
-            <span className="text-foreground">Up</span>
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-md mx-auto leading-relaxed">
-            Fuel your WAX transactions with <span className="text-cheese font-semibold">CHEESE</span>.
-            Rent CPU &amp; NET instantly from the PowerUp pool.
-          </p>
+          ) : (
+            <Button onClick={handleConnectWallet} className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+              <Wallet className="h-4 w-4" />
+              Connect Wallet
+            </Button>
+          )}
         </div>
+
+        {/* Title */}
+        <h1 className="text-2xl font-bold text-cheese-gradient tracking-wider">
+          CHEESE.Up
+        </h1>
 
         {/* PowerUp Card */}
         <PowerUpCard
