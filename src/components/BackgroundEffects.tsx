@@ -1,17 +1,22 @@
 export const BackgroundEffects = () => {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Gradient orbs */}
-      <div className="absolute top-1/4 -left-48 w-96 h-96 rounded-full blur-3xl animate-pulse-glow"
-        style={{ background: "hsl(45 100% 50% / 0.08)" }} />
-      <div className="absolute bottom-1/4 -right-48 w-96 h-96 rounded-full blur-3xl animate-pulse-glow"
-        style={{ background: "hsl(48 95% 60% / 0.06)", animationDelay: "1.5s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-3xl"
-        style={{ background: "hsl(40 30% 8% / 0.5)" }} />
+      {/* Deep dark base */}
+      <div className="absolute inset-0" style={{ background: "hsl(20 10% 5%)" }} />
+
+      {/* Very subtle warm orbs — like cheese.null */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-3xl opacity-30"
+        style={{ background: "radial-gradient(ellipse, hsl(45 80% 30% / 0.4) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full blur-3xl opacity-20"
+        style={{ background: "radial-gradient(ellipse, hsl(45 60% 20% / 0.3) 0%, transparent 70%)" }}
+      />
 
       {/* Subtle grid */}
       <div
-        className="absolute inset-0 opacity-[0.02]"
+        className="absolute inset-0 opacity-[0.025]"
         style={{
           backgroundImage: `
             linear-gradient(hsl(45 100% 50%) 1px, transparent 1px),
@@ -20,12 +25,6 @@ export const BackgroundEffects = () => {
           backgroundSize: "60px 60px",
         }}
       />
-
-      {/* Floating cheese emojis */}
-      <div className="absolute top-24 left-16 text-4xl opacity-10 animate-float select-none">🧀</div>
-      <div className="absolute top-40 right-28 text-3xl opacity-8 animate-float select-none" style={{ animationDelay: "2s" }}>🧀</div>
-      <div className="absolute bottom-36 left-36 text-5xl opacity-6 animate-float select-none" style={{ animationDelay: "4s" }}>🧀</div>
-      <div className="absolute bottom-24 right-16 text-3xl opacity-10 animate-float select-none" style={{ animationDelay: "3s" }}>🧀</div>
     </div>
   );
 };
