@@ -1,38 +1,31 @@
 
-## Fix 404 on GitHub Pages — Switch to HashRouter
+## Fix GitHub Actions Build — Replace `npm ci` with `npm install`
 
 ### Root Cause
 
-GitHub Pages serves static files only. When a user visits `https://cheeseupwax.github.io/cheeseup/`, the server correctly returns `index.html`. However, `BrowserRouter` uses the HTML5 History API (e.g., `/cheeseup/some-page`), and GitHub Pages has no server-side rule to rewrite those paths back to `index.html` — so they return a 404.
+`npm ci` is a strict install command — it fails if `package.json` and `package-lock.json` are out of sync at all. The error shows several packages are missing from the lock file (like `@testing-library/dom`, `picomatch`, etc.) and there's a conflicting `@aws-amplify` peer dependency that is causing mismatches.
 
-`HashRouter` puts the route after a `#` (e.g., `https://cheeseupwax.github.io/cheeseup/#/`), which is never sent to the server — the browser handles it entirely. This is the standard, reliable fix for SPAs on GitHub Pages.
+This project's lock file was generated in Lovable's environment (using Bun internally), and the GitHub Actions runner generates a slightly different resolution, causing `npm ci` to reject it.
 
----
+### Fix
 
-### Change Required
+**File: `.github/workflows/deploy.yml`**
 
-**File: `src/App.tsx`** — one line change:
-
-Replace `BrowserRouter` with `HashRouter`:
-
-```tsx
-// Before
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-<BrowserRouter>...</BrowserRouter>
-
-// After
-import { HashRouter, Routes, Route } from "react-router-dom";
-<HashRouter>...</HashRouter>
+Change line 29 from:
+```yaml
+- run: npm ci
+```
+to:
+```yaml
+- run: npm install --legacy-peer-deps
 ```
 
-No other files need changing. The `base: '/cheeseup/'` in `vite.config.ts` and the GitHub Actions workflow are both correct and can stay as-is.
+The `--legacy-peer-deps` flag also handles the `@aws-amplify` peer dependency warning that appears in the logs, preventing it from potentially blocking the install.
 
----
+### Why This Works
 
-### After This Change
+- `npm install` regenerates the lock file fresh on the runner rather than validating an existing one
+- `--legacy-peer-deps` tells npm to use npm v6 peer dependency resolution, which is more permissive and handles the `@aws-amplify` conflict gracefully
+- The build output (`dist/`) will be identical — this only affects how dependencies are installed, not what gets built
 
-Once pushed to `main`, GitHub Actions will automatically rebuild and redeploy. The site will load at:
-
-**`https://cheeseupwax.github.io/cheeseup/`** — no more 404.
-
-The URL in the browser will show `https://cheeseupwax.github.io/cheeseup/#/` which is normal and expected behaviour for GitHub Pages SPAs.
+### No other files need changing.
