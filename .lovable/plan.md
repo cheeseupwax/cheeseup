@@ -1,92 +1,38 @@
 
-## Deploy CheeseUp to GitHub Pages
+## Fix 404 on GitHub Pages — Switch to HashRouter
 
-### Repository Details
-- GitHub Org/User: `cheeseupwax`
-- Repository name: `cheeseup`
-- Final URL will be: **https://cheeseupwax.github.io/cheeseup/**
+### Root Cause
 
----
+GitHub Pages serves static files only. When a user visits `https://cheeseupwax.github.io/cheeseup/`, the server correctly returns `index.html`. However, `BrowserRouter` uses the HTML5 History API (e.g., `/cheeseup/some-page`), and GitHub Pages has no server-side rule to rewrite those paths back to `index.html` — so they return a 404.
 
-### What needs to change
-
-**Two files to create/modify:**
-
-**1. `vite.config.ts` — add `base` path**
-
-Without this, GitHub Pages will serve the site from `/cheeseup/` but Vite will generate asset links starting from `/`, causing a blank white page. Adding `base: '/cheeseup/'` fixes this.
-
-**2. `.github/workflows/deploy.yml` — new GitHub Actions workflow**
-
-This file automates the entire build and deploy process. Every push to `main` triggers it automatically.
+`HashRouter` puts the route after a `#` (e.g., `https://cheeseupwax.github.io/cheeseup/#/`), which is never sent to the server — the browser handles it entirely. This is the standard, reliable fix for SPAs on GitHub Pages.
 
 ---
 
-### Deployment Flow
+### Change Required
 
-```text
-Push to main (from Lovable or GitHub)
-         ↓
-GitHub Actions: install deps → build → deploy
-         ↓
-Site live at https://cheeseupwax.github.io/cheeseup/
+**File: `src/App.tsx`** — one line change:
+
+Replace `BrowserRouter` with `HashRouter`:
+
+```tsx
+// Before
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+<BrowserRouter>...</BrowserRouter>
+
+// After
+import { HashRouter, Routes, Route } from "react-router-dom";
+<HashRouter>...</HashRouter>
 ```
 
----
-
-### Technical Details
-
-**`vite.config.ts` change:**
-```ts
-base: '/cheeseup/',
-```
-Added inside the `defineConfig` object, alongside the existing `server` and `plugins` config.
-
-**`.github/workflows/deploy.yml`:**
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - uses: actions/deploy-pages@v4
-        id: deployment
-```
+No other files need changing. The `base: '/cheeseup/'` in `vite.config.ts` and the GitHub Actions workflow are both correct and can stay as-is.
 
 ---
 
-### One manual step you do in GitHub (after first workflow run)
+### After This Change
 
-1. Go to **https://github.com/cheeseupwax/cheeseup/settings/pages**
-2. Under **Source**, select **GitHub Actions**
-3. Click **Save**
+Once pushed to `main`, GitHub Actions will automatically rebuild and redeploy. The site will load at:
 
-That's it — after approving this plan, every future push from Lovable will automatically rebuild and redeploy the live site.
+**`https://cheeseupwax.github.io/cheeseup/`** — no more 404.
+
+The URL in the browser will show `https://cheeseupwax.github.io/cheeseup/#/` which is normal and expected behaviour for GitHub Pages SPAs.
