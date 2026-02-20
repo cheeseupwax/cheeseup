@@ -3,7 +3,7 @@ import { Session } from "@wharfkit/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+
 import {
   Dialog,
   DialogContent,
@@ -60,7 +60,7 @@ export const PowerUpCard = ({
   const [successDetails, setSuccessDetails] = useState<SuccessDetails | null>(null);
 
   const totalCheese = cpuAmount + netAmount;
-  const maxSlider = Math.max(cheeseBalance, 1000);
+  
 
   const { estimate, isLoading: isEstimateLoading } = useCheeseEstimate(cpuAmount, netAmount);
 
@@ -186,33 +186,23 @@ export const PowerUpCard = ({
           )}
         </div>
 
-        {/* CPU Slider */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 text-muted-foreground">
-              <Cpu className="w-4 h-4 text-cheese" />
-              CPU Power
-            </Label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                value={cpuAmount || ""}
-                onChange={(e) => setCpuAmount(Math.max(0, parseFloat(e.target.value) || 0))}
-                className="w-24 h-8 text-right bg-secondary border-border font-mono text-sm"
-                placeholder="0"
-                disabled={isTransacting}
-              />
-              <span className="text-xs text-muted-foreground">CHEESE</span>
-            </div>
+        {/* CPU Input */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2 text-muted-foreground">
+            <Cpu className="w-4 h-4 text-cheese" />
+            CPU Power
+          </Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              value={cpuAmount || ""}
+              onChange={(e) => setCpuAmount(Math.max(0, parseFloat(e.target.value) || 0))}
+              className="flex-1 bg-secondary border-border font-mono"
+              placeholder="0"
+              disabled={isTransacting}
+            />
+            <span className="text-sm text-muted-foreground font-mono">CHEESE</span>
           </div>
-          <Slider
-            value={[cpuAmount]}
-            onValueChange={([v]) => setCpuAmount(v)}
-            max={maxSlider}
-            step={1}
-            disabled={isTransacting}
-            className="[&>span:first-child]:bg-secondary [&_[role=slider]]:border-cheese [&_[role=slider]]:cheese-glow"
-          />
           {estimate && cpuAmount > 0 && (
             <p className="text-xs text-muted-foreground">
               ≈ {estimate.estimatedCpuMs.toFixed(0)}ms CPU
@@ -221,33 +211,23 @@ export const PowerUpCard = ({
           )}
         </div>
 
-        {/* NET Slider */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 text-muted-foreground">
-              <Wifi className="w-4 h-4 text-accent" />
-              NET Bandwidth
-            </Label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                value={netAmount || ""}
-                onChange={(e) => setNetAmount(Math.max(0, parseFloat(e.target.value) || 0))}
-                className="w-24 h-8 text-right bg-secondary border-border font-mono text-sm"
-                placeholder="0"
-                disabled={isTransacting}
-              />
-              <span className="text-xs text-muted-foreground">CHEESE</span>
-            </div>
+        {/* NET Input */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2 text-muted-foreground">
+            <Wifi className="w-4 h-4 text-accent" />
+            NET Bandwidth
+          </Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              value={netAmount || ""}
+              onChange={(e) => setNetAmount(Math.max(0, parseFloat(e.target.value) || 0))}
+              className="flex-1 bg-secondary border-border font-mono"
+              placeholder="0"
+              disabled={isTransacting}
+            />
+            <span className="text-sm text-muted-foreground font-mono">CHEESE</span>
           </div>
-          <Slider
-            value={[netAmount]}
-            onValueChange={([v]) => setNetAmount(v)}
-            max={maxSlider}
-            step={1}
-            disabled={isTransacting}
-            className="[&>span:first-child]:bg-secondary [&_[role=slider]]:border-accent"
-          />
           {estimate && netAmount > 0 && (
             <p className="text-xs text-muted-foreground">
               ≈ {formatBytes(estimate.estimatedNetBytes)} NET
