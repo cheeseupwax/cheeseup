@@ -126,7 +126,10 @@ export const useWaxWallet = () => {
   }, [fetchCheeseBalance]);
 
   const connect = useCallback(async () => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    // Don't set isLoading here — the wallet SDK shows its own UI overlay.
+    // Setting isLoading causes a permanent spinner if the user closes the popup
+    // because kit.login() never resolves/rejects in that case.
+    setState((prev) => ({ ...prev, error: null }));
     try {
       const kit = getSessionKit();
       const response = await kit.login();
@@ -143,8 +146,6 @@ export const useWaxWallet = () => {
         });
         fetchCheeseBalance(name);
         return response.session;
-      } else {
-        setState((prev) => ({ ...prev, isLoading: false }));
       }
     } catch (error) {
       console.warn("Wallet connect cancelled or failed:", error);
