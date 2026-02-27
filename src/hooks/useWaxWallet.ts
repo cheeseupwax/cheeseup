@@ -143,6 +143,8 @@ export const useWaxWallet = () => {
         });
         fetchCheeseBalance(name);
         return response.session;
+      } else {
+        setState((prev) => ({ ...prev, isLoading: false }));
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to connect wallet";
