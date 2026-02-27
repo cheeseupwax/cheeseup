@@ -1,31 +1,24 @@
 
-## Fix GitHub Actions Build — Replace `npm ci` with `npm install`
 
-### Root Cause
+## Fix: Wallet connect spinner stuck after closing popup
 
-`npm ci` is a strict install command — it fails if `package.json` and `package-lock.json` are out of sync at all. The error shows several packages are missing from the lock file (like `@testing-library/dom`, `picomatch`, etc.) and there's a conflicting `@aws-amplify` peer dependency that is causing mismatches.
+### Problem
 
-This project's lock file was generated in Lovable's environment (using Bun internally), and the GitHub Actions runner generates a slightly different resolution, causing `npm ci` to reject it.
+When you click "Connect Wallet" and then close the wallet selection popup without choosing a wallet, the loading spinner stays spinning forever. This happens because the `connect()` function sets `isLoading: true` at the start, but if `kit.login()` resolves without returning a session (user cancelled), the code never sets `isLoading` back to `false`.
 
 ### Fix
 
-**File: `.github/workflows/deploy.yml`**
+**File: `src/hooks/useWaxWallet.ts`** — in the `connect` function, add a fallback after the `if (response.session)` block to reset `isLoading` when no session is returned:
 
-Change line 29 from:
-```yaml
-- run: npm ci
+```ts
+const response = await kit.login();
+if (response.session) {
+  // ... existing session handling ...
+} else {
+  // User cancelled — reset loading state
+  setState((prev) => ({ ...prev, isLoading: false }));
+}
 ```
-to:
-```yaml
-- run: npm install --legacy-peer-deps
-```
 
-The `--legacy-peer-deps` flag also handles the `@aws-amplify` peer dependency warning that appears in the logs, preventing it from potentially blocking the install.
+This single addition ensures that if the login popup is closed without selecting a wallet, the UI returns to its normal "Connect Wallet" state instead of showing a permanent spinner.
 
-### Why This Works
-
-- `npm install` regenerates the lock file fresh on the runner rather than validating an existing one
-- `--legacy-peer-deps` tells npm to use npm v6 peer dependency resolution, which is more permissive and handles the `@aws-amplify` conflict gracefully
-- The build output (`dist/`) will be identical — this only affects how dependencies are installed, not what gets built
-
-### No other files need changing.
