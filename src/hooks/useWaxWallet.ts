@@ -147,9 +147,8 @@ export const useWaxWallet = () => {
         setState((prev) => ({ ...prev, isLoading: false }));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to connect wallet";
-      setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
-      throw error;
+      console.warn("Wallet connect cancelled or failed:", error);
+      setState((prev) => ({ ...prev, isLoading: false, error: null }));
     }
   }, [fetchCheeseBalance]);
 
